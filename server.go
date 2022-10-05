@@ -86,12 +86,12 @@ func (srv *Server) Handler(channel string) http.HandlerFunc {
 		}
 		srv.subs <- sub
 		flusher := w.(http.Flusher)
-		notifier := w.(http.CloseNotifier)
+		notifier := req.Context()
 		flusher.Flush()
 		enc := NewEncoder(w, useGzip)
 		for {
 			select {
-			case <-notifier.CloseNotify():
+			case <-notifier.Done():
 				srv.unregister <- sub
 				return
 			case ev, ok := <-sub.out:
